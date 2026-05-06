@@ -256,20 +256,6 @@ cards.forEach((card, i) => {
     .toLowerCase();
 });
     
-  // find matching API data
-  const temp = maxTemps[i];
-  const code = codes[i];
-
-  const weatherType = getWeatherType(code);
-  const icon = iconMap[weatherType] ?? cloudIconURL;
-
-  iconEl.src = icon;
-  tempEl.textContent = temp === "--" ? "--" : `${temp}°`;
-
-  nameEl.textContent = new Date(date)
-    .toLocaleDateString("en-US", { weekday: "short" })
-    .toLowerCase();
-});
      
   } catch (err) {
     console.error(err);
