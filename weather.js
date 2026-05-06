@@ -178,31 +178,44 @@ async function getWeeklyWeather(city) {
   try {
     const { lat, lon, name } = await getCoords(city);
 
-    const url = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,alerts&units=imperial&appid=${apiKey}`;
+    const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=imperial&appid=${apiKey}`;
+     
+   const res = await fetch(url);
+   const data = await res.json();
 
-    const res = await fetch(url);
-    const data = await res.json();
+const dailyMap = {};
 
-    locationElement.textContent = name.toLowerCase();
+data.list.forEach(item => {
+  const date = item.dt_txt.split(" ")[0];
 
-    const days = document.querySelectorAll(".day");
+  if (!dailyMap[date]) {
+    dailyMap[date] = [];
+  }
 
-    data.daily.slice(0, 7).forEach((day, i) => {
-      if (!days[i]) return;
+  dailyMap[date].push(item);
+});
 
-      const weather = day.weather[0].main;
-      const temp = Math.round(day.temp.day);
+const daysArray = Object.keys(dailyMap).slice(0, 7);
 
-      const iconEl = days[i].querySelector(".day-icon");
-      const tempEl = days[i].querySelector(".day-temp");
-      const nameEl = days[i].querySelector(".day-name");
+daysArray.forEach((day, i) => {
+  const entries = dailyMap[day];
 
-      nameEl.textContent = new Date(day.dt * 1000)
-        .toLocaleDateString("en-US", { weekday: "short" })
-        .toLowerCase();
+  const midday = entries[Math.floor(entries.length / 2)];
 
-      tempEl.textContent = `${temp}°`;
-      iconEl.src = iconMap[weather] || cloudIconURL;
+  const weather = midday.weather[0].main;
+  const temp = Math.round(midday.main.temp);
+
+  const iconEl = document.querySelectorAll(".day-icon")[i];
+  const tempEl = document.querySelectorAll(".day-temp")[i];
+  const nameEl = document.querySelectorAll(".day-name")[i];
+
+  nameEl.textContent = new Date(day)
+    .toLocaleDateString("en-US", { weekday: "short" })
+    .toLowerCase();
+
+  tempEl.textContent = `${temp}°`;
+  iconEl.src = iconMap[weather] || cloudIconURL;
+});
     });
 
   } catch (err) {
