@@ -17,6 +17,7 @@ const copyLinkBtn = document.getElementById("copyLinkBtn");
 
 const params = new URLSearchParams(window.location.search);
 const isEmbed = params.get("embed") === "true";
+
 const iconMap = {
   Clear: "https://i.pinimg.com/originals/09/fb/e5/09fbe54e3fdbf459e490006c56f999f9.gif",
   Clouds: "https://i.pinimg.com/originals/e3/9d/e9/e39de96ddbf852ed53a4e9a993550641.gif",
@@ -172,92 +173,88 @@ async function getWeeklyWeather(city) {
   try {
     const { lat, lon, name, state } = await getCoords(city);
 
-// format nicely
-const cityName = name || city;
-const stateName = state ? state.toLowerCase() : "";
+    const cityName = name || city;
+    const stateName = state ? state.toLowerCase() : "";
 
-// inject into new layout
-const cityEl = document.getElementById("cityName");
-const stateEl = document.getElementById("stateName");
+    const cityEl = document.getElementById("cityName");
+    const stateEl = document.getElementById("stateName");
 
-if (cityEl) cityEl.textContent = cityName;
-if (stateEl) stateEl.textContent = stateName;
+    if (cityEl) cityEl.textContent = cityName;
+    if (stateEl) stateEl.textContent = stateName;
 
     const weatherURL = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`;
 
-const res = await fetch(weatherURL);
-const data = await res.json();
+    const res = await fetch(weatherURL);
+    const data = await res.json();
 
-const days = data.daily.time;
-const maxTemps = data.daily.temperature_2m_max;
-const codes = data.daily.weathercode;
-const now = new Date();
+    const days = data.daily.time;
+    const maxTemps = data.daily.temperature_2m_max;
+    const codes = data.daily.weathercode;
 
-const dayIndex = now.getDay();
-const mondayOffset = dayIndex === 0 ? -6 : 1 - dayIndex;
+    const now = new Date();
 
-const monday = new Date(now);
-monday.setDate(now.getDate() + mondayOffset);
-monday.setHours(0, 0, 0, 0);
-const weekDates = Array.from({ length: 7 }).map((_, i) => {
-  const d = new Date(monday);
-  d.setDate(monday.getDate() + i);
-  return d.toISOString().split("T")[0];
-});
+    const dayIndex = now.getDay();
+    const mondayOffset = dayIndex === 0 ? -6 : 1 - dayIndex;
 
-function getWeatherType(code) {
-  if (code === 0) return "Clear";
-  if (code <= 3) return "Clouds";
-  if (code <= 48) return "Fog";
-  if (code <= 67) return "Rain";
-  if (code <= 77) return "Snow";
-  if (code <= 82) return "Rain";
-  if (code <= 86) return "Snow";
-  return "Thunderstorm";
-}
+    const monday = new Date(now);
+    monday.setDate(now.getDate() + mondayOffset);
+    monday.setHours(0, 0, 0, 0);
 
-document.querySelectorAll(".day").forEach(card => {
-  card.classList.remove("today");
-});
+    const weekDates = Array.from({ length: 7 }).map((_, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      return d.toISOString().split("T")[0];
+    });
 
-  const cards = document.querySelectorAll(".day");
+    function getWeatherType(code) {
+      if (code === 0) return "Clear";
+      if (code <= 3) return "Clouds";
+      if (code <= 48) return "Fog";
+      if (code <= 67) return "Rain";
+      if (code <= 77) return "Snow";
+      if (code <= 82) return "Rain";
+      if (code <= 86) return "Snow";
+      return "Thunderstorm";
+    }
 
-// reset highlights
-cards.forEach(c => c.classList.remove("today"));
-const todayKey = new Intl.DateTimeFormat("en-CA", {
-  timeZone: "auto",
-}).format(new Date());
-cards.forEach((card, i) => {
-  const date = weekDates[i];
+    document.querySelectorAll(".day").forEach(card => {
+      card.classList.remove("today");
+    });
 
-  const iconEl = card.querySelector(".day-icon");
-  const tempEl = card.querySelector(".day-temp");
-  const nameEl = card.querySelector(".day-name");
+    const cards = document.querySelectorAll(".day");
 
-  if (!iconEl || !tempEl || !nameEl) return;
+    const todayKey = days[0].split("T")[0];
 
-  const isToday = date === todayKey;
-  card.classList.toggle("today", isToday);
+    cards.forEach((card, i) => {
+      const date = weekDates[i];
 
-  const temp = maxTemps[i];
-  const code = codes[i];
+      const iconEl = card.querySelector(".day-icon");
+      const tempEl = card.querySelector(".day-temp");
+      const nameEl = card.querySelector(".day-name");
 
-  const weatherType = getWeatherType(code);
-  const icon = iconMap[weatherType] ?? cloudIconURL;
+      if (!iconEl || !tempEl || !nameEl) return;
 
-  iconEl.src = icon;
-  tempEl.textContent = `${Math.round(temp)}°`;
+      const isToday = date === todayKey;
+      card.classList.toggle("today", isToday);
 
-  nameEl.textContent = new Date(date)
-    .toLocaleDateString("en-US", { weekday: "short" })
-    .toLowerCase();
-});
-    
-     
+      const temp = maxTemps[i];
+      const code = codes[i];
+
+      const weatherType = getWeatherType(code);
+      const icon = iconMap[weatherType] ?? cloudIconURL;
+
+      iconEl.src = icon;
+      tempEl.textContent = `${Math.round(temp)}°`;
+
+      nameEl.textContent = new Date(date)
+        .toLocaleDateString("en-US", { weekday: "short" })
+        .toLowerCase();
+    });
+
   } catch (err) {
     console.error(err);
     const cityEl = document.getElementById("cityName");
-if (cityEl) cityEl.textContent = "unable to catch weather :(";
+    if (cityEl) cityEl.textContent = "unable to catch weather :(";
   }
 }
 
