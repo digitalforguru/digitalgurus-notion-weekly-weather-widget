@@ -196,92 +196,53 @@ const stateEl = document.getElementById("stateName");
 if (cityEl) cityEl.textContent = cityName;
 if (stateEl) stateEl.textContent = stateName;
 
-    const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=imperial&appid=${apiKey}`;
-     
-   const res = await fetch(url);
-   const data = await res.json();
+    const weatherURL = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`;
 
-const dailyMap = {};
+const res = await fetch(weatherURL);
+const data = await res.json();
 
-data.list.forEach(item => {
-  const date = item.dt_txt.split(" ")[0];
+const days = data.daily.time;
+const maxTemps = data.daily.temperature_2m_max;
+const codes = data.daily.weathercode;
 
-  if (!dailyMap[date]) {
-    dailyMap[date] = [];
-  }
-
-  dailyMap[date].push(item);
-});
-
-const today = new Date();
-today.setHours(0, 0, 0, 0);
-
-// get Sunday of current week
-const sunday = new Date(today);
-sunday.setDate(today.getDate() - today.getDay());
-
-const daysArray = Array.from({ length: 7 }).map((_, i) => {
-  const date = new Date(sunday);
-  date.setDate(sunday.getDate() + i);
-
-  const key = date.toISOString().split("T")[0];
-
-  return {
-    date: key,
-    entries: dailyMap[key] || []
-  };
-});
-
-daysArray.forEach((dayObj, i) => {
-  const { date, entries } = dayObj;
-   
- const todayKey = new Date().toISOString().split("T")[0];
- const isToday = dayObj.date === todayKey;
-
-let midday;
-
-if (!entries || entries.length === 0) {
-  midday = {
-    main: { temp: "--" },
-    weather: [{ main: "Clear" }]
-  };
-} else {
-  midday =
-    entries.find(e => e.dt_txt.includes("12:00:00")) ||
-    entries.find(e => e.weather?.[0]) ||
-    entries[0];
+function getWeatherType(code) {
+  if (code === 0) return "Clear";
+  if (code <= 3) return "Clouds";
+  if (code <= 48) return "Fog";
+  if (code <= 67) return "Rain";
+  if (code <= 77) return "Snow";
+  if (code <= 82) return "Rain";
+  if (code <= 86) return "Snow";
+  return "Thunderstorm";
 }
-   
-  const temp =
-  midday.main.temp === "--"
-    ? "--"
-    : Math.round(midday.main.temp);
 
+const todayKey = new Date().toISOString().split("T")[0];
+
+days.forEach((date, i) => {
   const iconEl = document.querySelectorAll(".day-icon")[i];
-if (!iconEl) return;
   const tempEl = document.querySelectorAll(".day-temp")[i];
   const nameEl = document.querySelectorAll(".day-name")[i];
   const dayCard = document.querySelectorAll(".day")[i];
 
-if (isToday && dayCard) {
-  dayCard.classList.add("today");
-}
+  if (!iconEl || !tempEl || !nameEl) return;
+
+  const isToday = date === todayKey;
+
+  if (dayCard && isToday) {
+    dayCard.classList.add("today");
+  }
+
+  const weatherType = getWeatherType(codes[i]);
+  const icon = iconMap[weatherType] ?? cloudIconURL;
+
+  iconEl.src = icon;
+
+  const temp = Math.round(maxTemps[i]);
+  tempEl.textContent = `${temp}°`;
 
   nameEl.textContent = new Date(date)
     .toLocaleDateString("en-US", { weekday: "short" })
     .toLowerCase();
-
-  tempEl.textContent = `${temp}°`;
-  const weather =
-  midday.weather?.[0]?.main?.trim() || "Clouds";
-const icon = iconMap[weather] ?? cloudIconURL;
-
-if (iconEl) {
-  iconEl.src = icon;
-  iconEl.onerror = () => {
-    iconEl.src = cloudIconURL;
-  };
-}
 });
      
   } catch (err) {
