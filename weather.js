@@ -41,7 +41,7 @@ if (isEmbed) {
 }
 
 /* =========================
-   LIVE DATE HEADER
+   LIVE DATE
 ========================= */
 function updateLiveDate() {
   if (!liveDateEl) return;
@@ -71,6 +71,27 @@ function applyFont(font) {
   weatherWidget.style.fontFamily = fontFamily;
 }
 
+/* =========================
+   THEME SYSTEM
+========================= */
+function applyTheme(theme) {
+  weatherWidget.className = `widget ${theme} weekly-widget`;
+}
+
+/* =========================
+   URL STATE (SOURCE OF TRUTH)
+========================= */
+function getStateFromURL() {
+  return {
+    city: params.get("city") || "Los Angeles",
+    theme: params.get("theme") || "pink",
+    font: params.get("font") || "default"
+  };
+}
+
+/* =========================
+   FONT UI
+========================= */
 fontToggle?.addEventListener("click", (e) => {
   e.stopPropagation();
   fontOptions.classList.toggle("hidden");
@@ -86,7 +107,7 @@ fontChoices.forEach(opt => {
 });
 
 /* =========================
-   THEME SYSTEM
+   THEME UI
 ========================= */
 themeToggle?.addEventListener("click", () => {
   themeOptions.classList.toggle("hidden");
@@ -95,14 +116,14 @@ themeToggle?.addEventListener("click", () => {
 themeCircles.forEach(circle => {
   circle.addEventListener("click", () => {
     const theme = circle.dataset.theme;
-    weatherWidget.className = `widget ${theme} weekly-widget`;
     localStorage.setItem("userTheme", theme);
+    applyTheme(theme);
     themeOptions.classList.add("hidden");
   });
 });
 
 /* =========================
-   LOCATION POPUP
+   LOCATION
 ========================= */
 locationBtn?.addEventListener("click", (e) => {
   e.stopPropagation();
@@ -134,6 +155,7 @@ async function getCoords(city) {
   const res = await fetch(
     `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`
   );
+
   const data = await res.json();
 
   if (!data.results?.length) throw new Error("city not found");
@@ -168,7 +190,8 @@ async function getWeeklyWeather(city) {
     const { lat, lon, name, state } = await getCoords(city);
 
     document.getElementById("cityName").textContent = name;
-    document.getElementById("stateName").textContent = (state || "").toLowerCase();
+    document.getElementById("stateName").textContent =
+      (state || "").toLowerCase();
 
     const res = await fetch(
       `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,weathercode&temperature_unit=fahrenheit&timezone=auto`
@@ -215,34 +238,35 @@ async function getWeeklyWeather(city) {
 }
 
 /* =========================
-   INIT
+   INIT (URL FIRST SYSTEM)
 ========================= */
 window.addEventListener("DOMContentLoaded", () => {
-  const city =
-    new URLSearchParams(window.location.search).get("city") ||
-    localStorage.getItem("userCity") ||
-    "Los Angeles";
+  const state = getStateFromURL();
 
-  const theme = localStorage.getItem("userTheme") || "pink";
-  const font = localStorage.getItem("userFont") || "default";
+  applyTheme(state.theme);
+  applyFont(state.font);
 
-  weatherWidget.className = `widget ${theme} weekly-widget`;
-
-  applyFont(font);
-  getWeeklyWeather(city);
+  getWeeklyWeather(state.city);
 });
 
 /* =========================
-   COPY LINK
+   COPY LINK (FULL EMBED STATE)
 ========================= */
-copyLinkBtn?.addEventListener("click", () => {
-  const city = localStorage.getItem("userCity") || "Los Angeles";
+copyLinkBtn?.addEventListener("click", async () => {
+  const city = localStorage.getItem("userCity") || getStateFromURL().city;
+  const theme = localStorage.getItem("userTheme") || getStateFromURL().theme;
+  const font = localStorage.getItem("userFont") || getStateFromURL().font;
 
-  const url = `${location.origin}${location.pathname}?city=${encodeURIComponent(
-    city
-  )}&embed=true`;
+  const url =
+    `${location.origin}${location.pathname}` +
+    `?city=${encodeURIComponent(city)}` +
+    `&theme=${theme}` +
+    `&font=${font}` +
+    `&embed=true`;
 
-  navigator.clipboard.writeText(url);
-
-  document.getElementById("copyMessage")?.classList.add("show");
+  try {
+    await navigator.clipboard.writeText(url);
+  } catch (err) {
+    console.error("copy failed", err);
+  }
 });
