@@ -191,6 +191,21 @@ const data = await res.json();
 const days = data.daily.time;
 const maxTemps = data.daily.temperature_2m_max;
 const codes = data.daily.weathercode;
+const today = new Date();
+const todayKey = today.toISOString().split("T")[0];
+
+// find Monday of current week
+const dayIndex = today.getDay();
+const mondayOffset = dayIndex === 0 ? -6 : 1 - dayIndex;
+
+const monday = new Date(today);
+monday.setDate(today.getDate() + mondayOffset);
+monday.setHours(0, 0, 0, 0);
+const weekDates = Array.from({ length: 7 }).map((_, i) => {
+  const d = new Date(monday);
+  d.setDate(monday.getDate() + i);
+  return d.toISOString().split("T")[0];
+});
 
 function getWeatherType(code) {
   if (code === 0) return "Clear";
@@ -209,19 +224,43 @@ document.querySelectorAll(".day").forEach(card => {
   card.classList.remove("today");
 });
 
-days.forEach((date, i) => {
-  const iconEl = document.querySelectorAll(".day-icon")[i];
-  const tempEl = document.querySelectorAll(".day-temp")[i];
-  const nameEl = document.querySelectorAll(".day-name")[i];
-  const dayCard = document.querySelectorAll(".day")[i];
+  const cards = document.querySelectorAll(".day");
+
+// reset highlights
+cards.forEach(c => c.classList.remove("today"));
+
+cards.forEach((card, i) => {
+
+  const date = weekDates[i];
+
+  const iconEl = card.querySelector(".day-icon");
+  const tempEl = card.querySelector(".day-temp");
+  const nameEl = card.querySelector(".day-name");
 
   if (!iconEl || !tempEl || !nameEl) return;
 
   const isToday = date === todayKey;
 
-  if (dayCard && isToday) {
-    dayCard.classList.add("today");
+  if (isToday) {
+    card.classList.add("today");
   }
+
+  // find matching API data
+  const apiIndex = days.indexOf(date);
+
+  const temp = apiIndex !== -1 ? Math.round(maxTemps[apiIndex]) : "--";
+  const code = apiIndex !== -1 ? codes[apiIndex] : 0;
+
+  const weatherType = getWeatherType(code);
+  const icon = iconMap[weatherType] ?? cloudIconURL;
+
+  iconEl.src = icon;
+  tempEl.textContent = temp === "--" ? "--" : `${temp}°`;
+
+  nameEl.textContent = new Date(date)
+    .toLocaleDateString("en-US", { weekday: "short" })
+    .toLowerCase();
+});
 
   const weatherType = getWeatherType(codes[i]);
   const icon = iconMap[weatherType] ?? cloudIconURL;
