@@ -192,7 +192,7 @@ const days = data.daily.time;
 const maxTemps = data.daily.temperature_2m_max;
 const codes = data.daily.weathercode;
 const today = new Date();
-const todayKey = today.toISOString().split("T")[0];
+
 
 // find Monday of current week
 const dayIndex = today.getDay();
