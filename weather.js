@@ -38,6 +38,16 @@ if (isEmbed) {
   if (builderUI) builderUI.style.display = "none";
 }
 
+/* =========================
+   LOCAL DATE FIX (IMPORTANT)
+========================= */
+function formatLocalDate(d) {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function buildWidgetURL(city, theme, font) {
   const base = window.location.origin + window.location.pathname;
   return `${base}?city=${encodeURIComponent(city)}&theme=${theme}&font=${font}&embed=true`;
@@ -60,7 +70,7 @@ function copyWidgetLink() {
 }
 
 /* =========================
-   🔤 FONT SYSTEM
+   FONT SYSTEM
 ========================= */
 fontToggle.addEventListener("click", (e) => {
   e.stopPropagation();
@@ -93,7 +103,7 @@ function applyFont(font) {
 }
 
 /* =========================
-   📍 LOCATION POPUP
+   LOCATION POPUP
 ========================= */
 locationBtn.addEventListener("click", (e) => {
   e.stopPropagation();
@@ -109,7 +119,6 @@ cityInput.addEventListener("keydown", (e) => {
     e.preventDefault();
 
     const city = cityInput.value.trim();
-
     if (!city) return;
 
     localStorage.setItem("userCity", city);
@@ -131,7 +140,7 @@ document.addEventListener("click", (e) => {
 });
 
 /* =========================
-   🎨 THEME SYSTEM
+   THEME SYSTEM
 ========================= */
 themeToggle.addEventListener("click", () => {
   themeOptions.classList.toggle("hidden");
@@ -149,7 +158,7 @@ themeCircles.forEach(circle => {
 });
 
 /* =========================
-   🌍 GEO + WEATHER
+   GEO + WEATHER
 ========================= */
 async function getCoords(city) {
   const geoURL = `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`;
@@ -187,7 +196,6 @@ async function getWeeklyWeather(city) {
     const res = await fetch(weatherURL);
     const data = await res.json();
 
-    const days = data.daily.time;
     const maxTemps = data.daily.temperature_2m_max;
     const codes = data.daily.weathercode;
 
@@ -203,8 +211,10 @@ async function getWeeklyWeather(city) {
     const weekDates = Array.from({ length: 7 }).map((_, i) => {
       const d = new Date(monday);
       d.setDate(monday.getDate() + i);
-      return d.toISOString().split("T")[0];
+      return formatLocalDate(d);
     });
+
+    const todayKey = formatLocalDate(now);
 
     function getWeatherType(code) {
       if (code === 0) return "Clear";
@@ -222,8 +232,6 @@ async function getWeeklyWeather(city) {
     });
 
     const cards = document.querySelectorAll(".day");
-
-    const todayKey = days[0].split("T")[0];
 
     cards.forEach((card, i) => {
       const date = weekDates[i];
@@ -259,7 +267,7 @@ async function getWeeklyWeather(city) {
 }
 
 /* =========================
-   🚀 INIT
+   INIT
 ========================= */
 window.addEventListener("DOMContentLoaded", () => {
   const urlCity = new URLSearchParams(window.location.search).get("city");
@@ -278,7 +286,7 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 /* =========================
-   🔗 COPY BUTTON
+   COPY BUTTON
 ========================= */
 if (copyLinkBtn) {
   copyLinkBtn.addEventListener("click", copyWidgetLink);
