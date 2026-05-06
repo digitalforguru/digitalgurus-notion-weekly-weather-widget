@@ -203,21 +203,19 @@ data.list.forEach(item => {
   dailyMap[date].push(item);
 });
 
-const daysArray = Object.entries(dailyMap)
-  .filter(([date, entries]) => entries?.length >= 2)
-  .sort((a, b) => new Date(a[0]) - new Date(b[0]))
-  .map(([date]) => date)
+const daysArray = Object.keys(dailyMap)
+  .sort((a, b) => new Date(a) - new Date(b))
   .slice(0, 7);
 
 daysArray.forEach((day, i) => {
   const entries = dailyMap[day];
    
-  const midday =
-     entries.find(e => e.dt_txt.includes("12:00:00")) ||
-     entries[Math.floor(entries.length / 2)] ||
-     entries[0];
-
-  const weather = midday.weather[0].main;
+ const midday =
+  entries.find(e => e.weather?.[0]) ||
+  entries.find(e => e.dt_txt.includes("12:00:00")) ||
+  entries[0];
+   
+  const weather = midday.weather[0].main.trim();
   const temp = Math.round(midday.main.temp);
 
   const iconEl = document.querySelectorAll(".day-icon")[i];
