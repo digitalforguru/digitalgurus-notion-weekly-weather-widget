@@ -203,12 +203,16 @@ data.list.forEach(item => {
   dailyMap[date].push(item);
 });
 
-const daysArray = Object.keys(dailyMap)
-  .sort((a, b) => new Date(a) - new Date(b))
+const daysArray = Object.entries(dailyMap)
+  .sort((a, b) => new Date(a[0]) - new Date(b[0]))
+  .map(([date, entries]) => ({
+    date,
+    entries
+  }))
   .slice(0, 7);
 
-daysArray.forEach((day, i) => {
-  const entries = dailyMap[day];
+daysArray.forEach((dayObj, i) => {
+  const { date, entries } = dayObj;
    
  const midday =
   entries.find(e => e.weather?.[0]) ||
@@ -223,12 +227,13 @@ if (!iconEl) return;
   const tempEl = document.querySelectorAll(".day-temp")[i];
   const nameEl = document.querySelectorAll(".day-name")[i];
 
-  nameEl.textContent = new Date(day)
+  nameEl.textContent = new Date(date)
     .toLocaleDateString("en-US", { weekday: "short" })
     .toLowerCase();
 
   tempEl.textContent = `${temp}°`;
-  const icon = iconMap[weather] || cloudIconURL;
+  const weather = midday.weather?.[0]?.main?.trim() || "Clear";
+const icon = iconMap[weather] ?? cloudIconURL;
 
 if (iconEl) {
   iconEl.src = icon;
