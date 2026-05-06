@@ -1,4 +1,4 @@
-const weatherWidget = document.getElementById("weatherWidget");
+
 const weatherIcon = document.getElementById("weatherIcon");
 const locationElement = document.getElementById("locationName");
 
