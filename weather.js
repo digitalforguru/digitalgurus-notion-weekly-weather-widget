@@ -224,11 +224,9 @@ document.querySelectorAll(".day").forEach(card => {
 
 // reset highlights
 cards.forEach(c => c.classList.remove("today"));
-const todayKey = new Date(
-  now.getFullYear(),
-  now.getMonth(),
-  now.getDate()
-).toISOString().split("T")[0];
+const todayKey = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "auto",
+}).format(new Date());
 cards.forEach((card, i) => {
   const date = weekDates[i];
 
