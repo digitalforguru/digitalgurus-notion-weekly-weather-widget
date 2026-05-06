@@ -228,12 +228,24 @@ daysArray.forEach((dayObj, i) => {
  const todayKey = new Date().toISOString().split("T")[0];
  const isToday = dayObj.date === todayKey;
 
- const midday =
-  entries.find(e => e.weather?.[0]) ||
-  entries.find(e => e.dt_txt.includes("12:00:00")) ||
-  entries[0];
+let midday;
+
+if (!entries || entries.length === 0) {
+  midday = {
+    main: { temp: "--" },
+    weather: [{ main: "Clear" }]
+  };
+} else {
+  midday =
+    entries.find(e => e.dt_txt.includes("12:00:00")) ||
+    entries.find(e => e.weather?.[0]) ||
+    entries[0];
+}
    
-  const temp = Math.round(midday.main.temp);
+  const temp =
+  midday.main.temp === "--"
+    ? "--"
+    : Math.round(midday.main.temp);
 
   const iconEl = document.querySelectorAll(".day-icon")[i];
 if (!iconEl) return;
@@ -250,7 +262,8 @@ if (isToday && dayCard) {
     .toLowerCase();
 
   tempEl.textContent = `${temp}°`;
-  const weather = midday.weather?.[0]?.main?.trim() || "Clear";
+  const weather =
+  midday.weather?.[0]?.main?.trim() || "Clouds";
 const icon = iconMap[weather] ?? cloudIconURL;
 
 if (iconEl) {
