@@ -183,8 +183,18 @@ async function getCoords(city) {
 
 async function getWeeklyWeather(city) {
   try {
-    const { lat, lon } = await getCoords(city);
-    locationElement.textContent = city.toLowerCase();
+    const { lat, lon, name, state } = await getCoords(city);
+
+// format nicely
+const cityName = name || city;
+const stateName = state || "";
+
+// inject into new layout
+const cityEl = document.getElementById("cityName");
+const stateEl = document.getElementById("stateName");
+
+if (cityEl) cityEl.textContent = cityName;
+if (stateEl) stateEl.textContent = stateName;
 
     const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=imperial&appid=${apiKey}`;
      
