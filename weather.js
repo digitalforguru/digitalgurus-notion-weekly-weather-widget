@@ -33,34 +33,25 @@ const iconMap = {
 const cloudIconURL =
   "https://i.pinimg.com/originals/e3/9d/e9/e39de96ddbf852ed53a4e9a993550641.gif";
 
+/* =========================
+   EMBED MODE
+========================= */
 if (isEmbed) {
   const builderUI = document.querySelector(".builder-ui");
   if (builderUI) builderUI.style.display = "none";
 }
 
-function buildWidgetURL(city, theme, font) {
-  const base = window.location.origin + window.location.pathname;
-  return `${base}?city=${encodeURIComponent(city)}&theme=${theme}&font=${font}&embed=true`;
-}
-
-function copyWidgetLink() {
-  const city = localStorage.getItem("userCity") || "Los Angeles";
-  const theme = localStorage.getItem("userTheme") || "pink";
-  const font = localStorage.getItem("userFont") || "default";
-
-  const url = buildWidgetURL(city, theme, font);
-  navigator.clipboard.writeText(url);
-
-  const message = document.getElementById("copyMessage");
-
-  if (message) {
-    message.classList.remove("hidden");
-    message.classList.add("show");
-  }
+/* =========================
+   UTILS
+========================= */
+function getLocalDateKey(date = new Date()) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+    .toISOString()
+    .split("T")[0];
 }
 
 /* =========================
-   🔤 FONT SYSTEM
+   FONT SYSTEM
 ========================= */
 fontToggle.addEventListener("click", (e) => {
   e.stopPropagation();
@@ -70,10 +61,8 @@ fontToggle.addEventListener("click", (e) => {
 fontChoices.forEach(option => {
   option.addEventListener("click", () => {
     const font = option.getAttribute("data-font");
-
     localStorage.setItem("userFont", font);
     applyFont(font);
-
     fontOptions.classList.add("hidden");
   });
 });
@@ -81,27 +70,20 @@ fontChoices.forEach(option => {
 function applyFont(font) {
   let fontFamily = "";
 
-  if (font === "serif") {
-    fontFamily = "Georgia, serif";
-  } else if (font === "mono") {
-    fontFamily = "ui-monospace, SFMono-Regular, Menlo, monospace";
-  } else {
-    fontFamily = "'Satoshi', sans-serif";
-  }
+  if (font === "serif") fontFamily = "Georgia, serif";
+  else if (font === "mono") fontFamily = "ui-monospace, SFMono-Regular, Menlo, monospace";
+  else fontFamily = "'Satoshi', sans-serif";
 
   weatherWidget.style.fontFamily = fontFamily;
 }
 
 /* =========================
-   📍 LOCATION POPUP
+   LOCATION POPUP
 ========================= */
 locationBtn.addEventListener("click", (e) => {
   e.stopPropagation();
   locationPopup.classList.toggle("hidden");
-
-  if (!locationPopup.classList.contains("hidden")) {
-    cityInput.focus();
-  }
+  if (!locationPopup.classList.contains("hidden")) cityInput.focus();
 });
 
 cityInput.addEventListener("keydown", (e) => {
@@ -109,12 +91,9 @@ cityInput.addEventListener("keydown", (e) => {
     e.preventDefault();
 
     const city = cityInput.value.trim();
-
     if (!city) return;
 
     localStorage.setItem("userCity", city);
-
-    cityInput.blur();
     locationPopup.classList.add("hidden");
 
     getWeeklyWeather(city);
@@ -122,16 +101,13 @@ cityInput.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("click", (e) => {
-  const inside = locationPopup?.contains(e.target);
-  const clickedBtn = locationBtn.contains(e.target);
-
-  if (!inside && !clickedBtn) {
+  if (!locationPopup?.contains(e.target) && !locationBtn.contains(e.target)) {
     locationPopup.classList.add("hidden");
   }
 });
 
 /* =========================
-   🎨 THEME SYSTEM
+   THEME SYSTEM
 ========================= */
 themeToggle.addEventListener("click", () => {
   themeOptions.classList.toggle("hidden");
@@ -140,26 +116,22 @@ themeToggle.addEventListener("click", () => {
 themeCircles.forEach(circle => {
   circle.addEventListener("click", () => {
     const theme = circle.getAttribute("data-theme");
-
     weatherWidget.className = `widget ${theme} weekly-widget`;
-
     localStorage.setItem("userTheme", theme);
     themeOptions.classList.add("hidden");
   });
 });
 
 /* =========================
-   🌍 GEO + WEATHER
+   GEO
 ========================= */
 async function getCoords(city) {
-  const geoURL = `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`;
-
-  const res = await fetch(geoURL);
+  const res = await fetch(
+    `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`
+  );
   const data = await res.json();
 
-  if (!data.results || !data.results[0]) {
-    throw new Error("city not found");
-  }
+  if (!data.results?.length) throw new Error("city not found");
 
   return {
     lat: data.results[0].latitude,
@@ -169,86 +141,67 @@ async function getCoords(city) {
   };
 }
 
+/* =========================
+   WEATHER CORE
+========================= */
 async function getWeeklyWeather(city) {
   try {
     const { lat, lon, name, state } = await getCoords(city);
 
-    const cityName = name || city;
-    const stateName = state ? state.toLowerCase() : "";
-
     const cityEl = document.getElementById("cityName");
     const stateEl = document.getElementById("stateName");
 
-    if (cityEl) cityEl.textContent = cityName;
-    if (stateEl) stateEl.textContent = stateName;
+    if (cityEl) cityEl.textContent = name || city;
+    if (stateEl) stateEl.textContent = (state || "").toLowerCase();
 
-    const weatherURL = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`;
+    const res = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,weathercode&timezone=auto`
+    );
 
-    const res = await fetch(weatherURL);
     const data = await res.json();
 
-    const days = data.daily.time;
-    const maxTemps = data.daily.temperature_2m_max;
-    const codes = data.daily.weathercode;
+    const days = data?.daily?.time || [];
+    const temps = data?.daily?.temperature_2m_max || [];
+    const codes = data?.daily?.weathercode || [];
 
-    const now = new Date();
-
-    const dayIndex = now.getDay();
-    const mondayOffset = dayIndex === 0 ? -6 : 1 - dayIndex;
-
-    const monday = new Date(now);
-    monday.setDate(now.getDate() + mondayOffset);
-    monday.setHours(0, 0, 0, 0);
-
-    const weekDates = Array.from({ length: 7 }).map((_, i) => {
-      const d = new Date(monday);
-      d.setDate(monday.getDate() + i);
-      return d.toISOString().split("T")[0];
-    });
-
-    function getWeatherType(code) {
-      if (code === 0) return "Clear";
-      if (code <= 3) return "Clouds";
-      if (code <= 48) return "Fog";
-      if (code <= 67) return "Rain";
-      if (code <= 77) return "Snow";
-      if (code <= 82) return "Rain";
-      if (code <= 86) return "Snow";
-      return "Thunderstorm";
-    }
-
-    document.querySelectorAll(".day").forEach(card => {
-      card.classList.remove("today");
-    });
+    const todayKey = getLocalDateKey();
 
     const cards = document.querySelectorAll(".day");
 
-    const todayKey = new Date().toISOString().split("T")[0];
-
     cards.forEach((card, i) => {
-      const date = weekDates[i];
-
       const iconEl = card.querySelector(".day-icon");
       const tempEl = card.querySelector(".day-temp");
       const nameEl = card.querySelector(".day-name");
 
       if (!iconEl || !tempEl || !nameEl) return;
 
-      const isToday = date === todayKey;
-      card.classList.toggle("today", isToday);
+      const date = days[i] || null;
 
-      const temp = maxTemps[i];
-      const code = codes[i];
+      /* fallback safety */
+      const temp = temps[i] ?? "--";
+      const code = codes[i] ?? 0;
 
-      const weatherType = getWeatherType(code);
-      const icon = iconMap[weatherType] ?? cloudIconURL;
+      const weatherType =
+        code === 0 ? "Clear" :
+        code <= 3 ? "Clouds" :
+        code <= 48 ? "Fog" :
+        code <= 67 ? "Rain" :
+        code <= 77 ? "Snow" :
+        code <= 82 ? "Rain" :
+        code <= 86 ? "Snow" :
+        "Thunderstorm";
 
-      iconEl.src = icon;
-      tempEl.textContent = `${Math.round(temp)}°`;
+      iconEl.src = iconMap[weatherType] || cloudIconURL;
+      tempEl.textContent = temp === "--" ? "--" : `${Math.round(temp)}°`;
 
-      nameEl.textContent = new Date(date)
-        .toLocaleDateString("en-US", { weekday: "short" })
-        .toLowerCase();
+      if (date) {
+        const isToday = date === todayKey;
+        card.classList.toggle("today", isToday);
+
+        nameEl.textContent = new Date(date)
+          .toLocaleDateString("en-US", { weekday: "short" })
+          .toLowerCase();
+      }
     });
 
   } catch (err) {
@@ -259,12 +212,14 @@ async function getWeeklyWeather(city) {
 }
 
 /* =========================
-   🚀 INIT
+   INIT
 ========================= */
 window.addEventListener("DOMContentLoaded", () => {
   const urlCity = new URLSearchParams(window.location.search).get("city");
 
-  const savedCity = urlCity || localStorage.getItem("userCity") || "Los Angeles";
+  const savedCity =
+    urlCity || localStorage.getItem("userCity") || "Los Angeles";
+
   const savedTheme = localStorage.getItem("userTheme") || "pink";
   const savedFont = localStorage.getItem("userFont") || "default";
 
@@ -278,8 +233,19 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 /* =========================
-   🔗 COPY BUTTON
+   COPY LINK
 ========================= */
 if (copyLinkBtn) {
-  copyLinkBtn.addEventListener("click", copyWidgetLink);
+  copyLinkBtn.addEventListener("click", () => {
+    const city = localStorage.getItem("userCity") || "Los Angeles";
+    const theme = localStorage.getItem("userTheme") || "pink";
+    const font = localStorage.getItem("userFont") || "default";
+
+    const url =
+      window.location.origin +
+      window.location.pathname +
+      `?city=${encodeURIComponent(city)}&theme=${theme}&font=${font}&embed=true`;
+
+    navigator.clipboard.writeText(url);
+  });
 }
