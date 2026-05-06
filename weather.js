@@ -1,3 +1,4 @@
+window.__TEST_TODAY_INDEX__ = null;
 const weatherWidget = document.getElementById("weatherWidget");
 
 const cityInput = document.getElementById("cityInput");
@@ -174,7 +175,10 @@ async function getWeeklyWeather(city) {
 
     const data = await res.json();
 
-    const todayIndex = 0; // 🔥 FIX: API guarantees index 0 = today
+   const todayIndex =
+  window.__TEST_TODAY_INDEX__ !== null
+    ? window.__TEST_TODAY_INDEX__
+    : 0;
 
     for (let i = 0; i < 7; i++) {
       const date = new Date();
