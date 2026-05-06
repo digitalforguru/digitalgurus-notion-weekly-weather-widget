@@ -598,3 +598,11 @@ body {
 .widget.beige .location-divider {
   background: linear-gradient(to right, #f3d1a7, transparent);
 }
+
+.live-date {
+  font-size: 12px;
+  opacity: 0.7;
+  text-align: center;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
