@@ -223,7 +223,7 @@ async function getWeeklyWeather(city) {
 
     const cards = document.querySelectorAll(".day");
 
-    const todayKey = days[0].split("T")[0];
+    const todayKey = new Date().toISOString().split("T")[0];
 
     cards.forEach((card, i) => {
       const date = weekDates[i];
