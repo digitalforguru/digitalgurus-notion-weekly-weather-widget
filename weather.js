@@ -198,7 +198,7 @@ const dayIndex = now.getDay();
 const mondayOffset = dayIndex === 0 ? -6 : 1 - dayIndex;
 
 const monday = new Date(now);
-monday.setDate(today.getDate() + mondayOffset);
+monday.setDate(now.getDate() + mondayOffset);
 monday.setHours(0, 0, 0, 0);
 const weekDates = Array.from({ length: 7 }).map((_, i) => {
   const d = new Date(monday);
