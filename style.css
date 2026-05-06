@@ -16,8 +16,8 @@ body {
 
   padding: 12px;
 
-  width: 180px;
-  height: 180px;
+  width: 320px;
+  height: auto;
 
   box-shadow:
     0 12px 30px rgba(0,0,0,0.12),
@@ -471,20 +471,16 @@ body {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 .weekly-widget {
-  width: 180px;
-  height: 180px;
+  width: 320px;   /* ✨ wider = room for 7 days */
+  height: auto;   /* ✨ let it grow naturally */
 
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
 
-  gap: 6px;
+  gap: 10px;
 
-  text-align: center;
-
-  padding: 12px;
-
+  padding: 14px;
   box-sizing: border-box;
 }
 
@@ -497,32 +493,29 @@ body {
   text-transform: lowercase;
 }
 
-/* grid */
 .weekly-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(7, 1fr); /* ✨ 7 days in a row */
   gap: 6px;
 
   width: 100%;
 }
-
-/* each day card */
 .day {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 
-  gap: 2px;
+  gap: 3px;
 
-  padding: 4px;
+  padding: 6px 4px;
 
-  border-radius: 10px;
+  border-radius: 12px;
 
-  background: rgba(255,255,255,0.25);
-  backdrop-filter: blur(8px);
+  background: rgba(255,255,255,0.35);
+  backdrop-filter: blur(10px);
 
-  transition: transform 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .day:hover {
@@ -530,24 +523,32 @@ body {
 }
 
 .day-name {
-  font-size: 0.55rem;
+  font-size: 0.6rem;
   opacity: 0.7;
-  margin: 0;
-  text-transform: lowercase;
 }
 
 .day-temp {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  margin: 0;
 }
 
 .day-icon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
 }
 .today {
-  border: 2px solid rgba(255, 255, 255, 0.6);
-  transform: scale(1.03);
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+  background: rgba(255,255,255,0.7);
+  border: 2px solid rgba(255,255,255,0.9);
+
+  transform: scale(1.08);
+
+  box-shadow:
+    0 6px 16px rgba(0,0,0,0.15),
+    0 0 12px rgba(255,255,255,0.5);
+}
+#locationName {
+  font-size: 0.8rem;
+  font-weight: 600;
+  opacity: 0.7;
+  letter-spacing: 0.4px;
 }
