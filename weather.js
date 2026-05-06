@@ -39,37 +39,6 @@ if (isEmbed) {
 }
 
 /* =========================
-   LOCAL DATE FIX (IMPORTANT)
-========================= */
-function formatLocalDate(d) {
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function buildWidgetURL(city, theme, font) {
-  const base = window.location.origin + window.location.pathname;
-  return `${base}?city=${encodeURIComponent(city)}&theme=${theme}&font=${font}&embed=true`;
-}
-
-function copyWidgetLink() {
-  const city = localStorage.getItem("userCity") || "Los Angeles";
-  const theme = localStorage.getItem("userTheme") || "pink";
-  const font = localStorage.getItem("userFont") || "default";
-
-  const url = buildWidgetURL(city, theme, font);
-  navigator.clipboard.writeText(url);
-
-  const message = document.getElementById("copyMessage");
-
-  if (message) {
-    message.classList.remove("hidden");
-    message.classList.add("show");
-  }
-}
-
-/* =========================
    FONT SYSTEM
 ========================= */
 fontToggle.addEventListener("click", (e) => {
@@ -91,13 +60,9 @@ fontChoices.forEach(option => {
 function applyFont(font) {
   let fontFamily = "";
 
-  if (font === "serif") {
-    fontFamily = "Georgia, serif";
-  } else if (font === "mono") {
-    fontFamily = "ui-monospace, SFMono-Regular, Menlo, monospace";
-  } else {
-    fontFamily = "'Satoshi', sans-serif";
-  }
+  if (font === "serif") fontFamily = "Georgia, serif";
+  else if (font === "mono") fontFamily = "ui-monospace, SFMono-Regular, Menlo, monospace";
+  else fontFamily = "'Satoshi', sans-serif";
 
   weatherWidget.style.fontFamily = fontFamily;
 }
@@ -178,43 +143,34 @@ async function getCoords(city) {
   };
 }
 
+/* =========================
+   WEATHER
+========================= */
 async function getWeeklyWeather(city) {
   try {
     const { lat, lon, name, state } = await getCoords(city);
 
-    const cityName = name || city;
-    const stateName = state ? state.toLowerCase() : "";
-
     const cityEl = document.getElementById("cityName");
     const stateEl = document.getElementById("stateName");
 
-    if (cityEl) cityEl.textContent = cityName;
-    if (stateEl) stateEl.textContent = stateName;
+    if (cityEl) cityEl.textContent = name || city;
+    if (stateEl) stateEl.textContent = (state || "").toLowerCase();
 
     const weatherURL = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`;
 
     const res = await fetch(weatherURL);
     const data = await res.json();
 
+    const days = data.daily.time;
     const maxTemps = data.daily.temperature_2m_max;
     const codes = data.daily.weathercode;
 
-    const now = new Date();
+    const cards = document.querySelectorAll(".day");
 
-    const dayIndex = now.getDay();
-    const mondayOffset = dayIndex === 0 ? -6 : 1 - dayIndex;
-
-    const monday = new Date(now);
-    monday.setDate(now.getDate() + mondayOffset);
-    monday.setHours(0, 0, 0, 0);
-
-    const weekDates = Array.from({ length: 7 }).map((_, i) => {
-      const d = new Date(monday);
-      d.setDate(monday.getDate() + i);
-      return formatLocalDate(d);
-    });
-
-    const todayKey = formatLocalDate(now);
+    // ✅ TRUE LOCAL TODAY (no fake timezone hacks)
+    const todayKey = new Intl.DateTimeFormat("en-CA", {
+      timeZone: data.timezone || undefined
+    }).format(new Date());
 
     function getWeatherType(code) {
       if (code === 0) return "Clear";
@@ -227,14 +183,8 @@ async function getWeeklyWeather(city) {
       return "Thunderstorm";
     }
 
-    document.querySelectorAll(".day").forEach(card => {
-      card.classList.remove("today");
-    });
-
-    const cards = document.querySelectorAll(".day");
-
     cards.forEach((card, i) => {
-      const date = weekDates[i];
+      const date = days[i];
 
       const iconEl = card.querySelector(".day-icon");
       const tempEl = card.querySelector(".day-temp");
@@ -272,7 +222,9 @@ async function getWeeklyWeather(city) {
 window.addEventListener("DOMContentLoaded", () => {
   const urlCity = new URLSearchParams(window.location.search).get("city");
 
-  const savedCity = urlCity || localStorage.getItem("userCity") || "Los Angeles";
+  const savedCity =
+    urlCity || localStorage.getItem("userCity") || "Los Angeles";
+
   const savedTheme = localStorage.getItem("userTheme") || "pink";
   const savedFont = localStorage.getItem("userFont") || "default";
 
@@ -286,8 +238,23 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 /* =========================
-   COPY BUTTON
+   COPY LINK
 ========================= */
 if (copyLinkBtn) {
-  copyLinkBtn.addEventListener("click", copyWidgetLink);
+  copyLinkBtn.addEventListener("click", () => {
+    const city = localStorage.getItem("userCity") || "Los Angeles";
+    const theme = localStorage.getItem("userTheme") || "pink";
+    const font = localStorage.getItem("userFont") || "default";
+
+    const base = window.location.origin + window.location.pathname;
+    const url = `${base}?city=${encodeURIComponent(city)}&theme=${theme}&font=${font}&embed=true`;
+
+    navigator.clipboard.writeText(url);
+
+    const message = document.getElementById("copyMessage");
+    if (message) {
+      message.classList.remove("hidden");
+      message.classList.add("show");
+    }
+  });
 }
