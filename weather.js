@@ -38,8 +38,29 @@ if (isEmbed) {
   if (builderUI) builderUI.style.display = "none";
 }
 
+function buildWidgetURL(city, theme, font) {
+  const base = window.location.origin + window.location.pathname;
+  return `${base}?city=${encodeURIComponent(city)}&theme=${theme}&font=${font}&embed=true`;
+}
+
+function copyWidgetLink() {
+  const city = localStorage.getItem("userCity") || "Los Angeles";
+  const theme = localStorage.getItem("userTheme") || "pink";
+  const font = localStorage.getItem("userFont") || "default";
+
+  const url = buildWidgetURL(city, theme, font);
+  navigator.clipboard.writeText(url);
+
+  const message = document.getElementById("copyMessage");
+
+  if (message) {
+    message.classList.remove("hidden");
+    message.classList.add("show");
+  }
+}
+
 /* =========================
-   FONT SYSTEM
+   🔤 FONT SYSTEM
 ========================= */
 fontToggle.addEventListener("click", (e) => {
   e.stopPropagation();
@@ -60,15 +81,19 @@ fontChoices.forEach(option => {
 function applyFont(font) {
   let fontFamily = "";
 
-  if (font === "serif") fontFamily = "Georgia, serif";
-  else if (font === "mono") fontFamily = "ui-monospace, SFMono-Regular, Menlo, monospace";
-  else fontFamily = "'Satoshi', sans-serif";
+  if (font === "serif") {
+    fontFamily = "Georgia, serif";
+  } else if (font === "mono") {
+    fontFamily = "ui-monospace, SFMono-Regular, Menlo, monospace";
+  } else {
+    fontFamily = "'Satoshi', sans-serif";
+  }
 
   weatherWidget.style.fontFamily = fontFamily;
 }
 
 /* =========================
-   LOCATION POPUP
+   📍 LOCATION POPUP
 ========================= */
 locationBtn.addEventListener("click", (e) => {
   e.stopPropagation();
@@ -84,6 +109,7 @@ cityInput.addEventListener("keydown", (e) => {
     e.preventDefault();
 
     const city = cityInput.value.trim();
+
     if (!city) return;
 
     localStorage.setItem("userCity", city);
@@ -105,7 +131,7 @@ document.addEventListener("click", (e) => {
 });
 
 /* =========================
-   THEME SYSTEM
+   🎨 THEME SYSTEM
 ========================= */
 themeToggle.addEventListener("click", () => {
   themeOptions.classList.toggle("hidden");
@@ -123,7 +149,7 @@ themeCircles.forEach(circle => {
 });
 
 /* =========================
-   GEO + WEATHER
+   🌍 GEO + WEATHER
 ========================= */
 async function getCoords(city) {
   const geoURL = `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`;
@@ -143,18 +169,18 @@ async function getCoords(city) {
   };
 }
 
-/* =========================
-   WEATHER
-========================= */
 async function getWeeklyWeather(city) {
   try {
     const { lat, lon, name, state } = await getCoords(city);
 
+    const cityName = name || city;
+    const stateName = state ? state.toLowerCase() : "";
+
     const cityEl = document.getElementById("cityName");
     const stateEl = document.getElementById("stateName");
 
-    if (cityEl) cityEl.textContent = name || city;
-    if (stateEl) stateEl.textContent = (state || "").toLowerCase();
+    if (cityEl) cityEl.textContent = cityName;
+    if (stateEl) stateEl.textContent = stateName;
 
     const weatherURL = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`;
 
@@ -165,12 +191,20 @@ async function getWeeklyWeather(city) {
     const maxTemps = data.daily.temperature_2m_max;
     const codes = data.daily.weathercode;
 
-    const cards = document.querySelectorAll(".day");
+    const now = new Date();
 
-    // ✅ TRUE LOCAL TODAY (no fake timezone hacks)
-    const todayKey = new Intl.DateTimeFormat("en-CA", {
-      timeZone: data.timezone || undefined
-    }).format(new Date());
+    const dayIndex = now.getDay();
+    const mondayOffset = dayIndex === 0 ? -6 : 1 - dayIndex;
+
+    const monday = new Date(now);
+    monday.setDate(now.getDate() + mondayOffset);
+    monday.setHours(0, 0, 0, 0);
+
+    const weekDates = Array.from({ length: 7 }).map((_, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      return d.toISOString().split("T")[0];
+    });
 
     function getWeatherType(code) {
       if (code === 0) return "Clear";
@@ -183,8 +217,16 @@ async function getWeeklyWeather(city) {
       return "Thunderstorm";
     }
 
+    document.querySelectorAll(".day").forEach(card => {
+      card.classList.remove("today");
+    });
+
+    const cards = document.querySelectorAll(".day");
+
+    const todayKey = days[0].split("T")[0];
+
     cards.forEach((card, i) => {
-      const date = days[i];
+      const date = weekDates[i];
 
       const iconEl = card.querySelector(".day-icon");
       const tempEl = card.querySelector(".day-temp");
@@ -217,14 +259,12 @@ async function getWeeklyWeather(city) {
 }
 
 /* =========================
-   INIT
+   🚀 INIT
 ========================= */
 window.addEventListener("DOMContentLoaded", () => {
   const urlCity = new URLSearchParams(window.location.search).get("city");
 
-  const savedCity =
-    urlCity || localStorage.getItem("userCity") || "Los Angeles";
-
+  const savedCity = urlCity || localStorage.getItem("userCity") || "Los Angeles";
   const savedTheme = localStorage.getItem("userTheme") || "pink";
   const savedFont = localStorage.getItem("userFont") || "default";
 
@@ -238,23 +278,8 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 /* =========================
-   COPY LINK
+   🔗 COPY BUTTON
 ========================= */
 if (copyLinkBtn) {
-  copyLinkBtn.addEventListener("click", () => {
-    const city = localStorage.getItem("userCity") || "Los Angeles";
-    const theme = localStorage.getItem("userTheme") || "pink";
-    const font = localStorage.getItem("userFont") || "default";
-
-    const base = window.location.origin + window.location.pathname;
-    const url = `${base}?city=${encodeURIComponent(city)}&theme=${theme}&font=${font}&embed=true`;
-
-    navigator.clipboard.writeText(url);
-
-    const message = document.getElementById("copyMessage");
-    if (message) {
-      message.classList.remove("hidden");
-      message.classList.add("show");
-    }
-  });
+  copyLinkBtn.addEventListener("click", copyWidgetLink);
 }
