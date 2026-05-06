@@ -191,7 +191,6 @@ const data = await res.json();
 const days = data.daily.time;
 const maxTemps = data.daily.temperature_2m_max;
 const codes = data.daily.weathercode;
-const today = new Date();
 
 
 // find Monday of current week
@@ -217,8 +216,6 @@ function getWeatherType(code) {
   if (code <= 86) return "Snow";
   return "Thunderstorm";
 }
-
-const todayKey = new Date().toISOString().split("T")[0];
 
 document.querySelectorAll(".day").forEach(card => {
   card.classList.remove("today");
