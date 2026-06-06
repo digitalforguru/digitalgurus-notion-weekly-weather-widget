@@ -820,3 +820,19 @@ html.embed-mode .embed-widget {
     width: min(320px, 92vw);
   }
 }
+.location-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.live-date {
+  margin: 0;
+  font-size: 9px;
+  opacity: 0.5;
+  text-align: right;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+}
