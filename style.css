@@ -305,10 +305,34 @@ body::before {
   white-space: nowrap;
 }
 
-.today,
-.day-card.active {
-  background: rgba(255,255,255,0.68);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5);
+.widget.pink .today {
+  background: rgba(199,120,157,0.16);
+  border: 1px solid rgba(199,120,157,0.28);
+}
+
+.widget.blue .today {
+  background: rgba(123,169,204,0.16);
+  border: 1px solid rgba(123,169,204,0.28);
+}
+
+.widget.green .today {
+  background: rgba(125,171,146,0.16);
+  border: 1px solid rgba(125,171,146,0.28);
+}
+
+.widget.beige .today {
+  background: rgba(204,166,120,0.16);
+  border: 1px solid rgba(204,166,120,0.28);
+}
+
+.widget.black .today {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.widget.white .today {
+  background: rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.08);
 }
 
 /* CONTROLS */
