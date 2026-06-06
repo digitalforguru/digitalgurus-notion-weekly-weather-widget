@@ -8,109 +8,211 @@
 </head>
 
 <body>
+  <main class="builder-page">
+    <section class="builder-ui">
 
-<div class="builder-ui">
+      <header class="builder-nav">
+        <a href="https://digitalforguru.github.io/digitalguru-notion-widget-claim-hub/" class="back-link">← back to studio</a>
+        <span class="status-pill">weekly weather</span>
+      </header>
 
-  <!-- HEADER -->
-  <div class="widget-header">
-    DigitalGuru's Notion Weekly Weather Widget
-  </div>
+      <section class="hero-card">
+        <p class="eyebrow">digitalguru widget setup</p>
+        <h1>Weekly Weather Widget</h1>
+        <p class="hero-subtitle">
+          add a soft weekly forecast to your Notion dashboard with location search, matching themes, fonts, and background modes.
+        </p>
+      </section>
 
-  <!-- THEME OPTIONS (MATCHES YOUR OTHER WIDGET STYLE) -->
-  <div id="themeOptions" class="theme-options hidden">
-    <div class="themes-row">
-      <div class="theme-circle pink" data-theme="pink"></div>
-      <div class="theme-circle beige" data-theme="beige"></div>
-      <div class="theme-circle blue" data-theme="blue"></div>
-      <div class="theme-circle green" data-theme="green"></div>
-      <div class="theme-circle black" data-theme="black"></div>
-      <div class="theme-circle white" data-theme="white"></div>
+      <section class="guide-grid">
+        <div class="info-card">
+          <p class="section-label">quick start</p>
+          <h2>How to use it?</h2>
+          <ol>
+            <li>Choose your city, theme, background, and font.</li>
+            <li>Copy your embed link.</li>
+            <li>Paste it into Notion using <strong>/embed</strong>.</li>
+          </ol>
+        </div>
+
+        <div class="info-card">
+          <p class="section-label">dashboard tip</p>
+          <h2>Best placement</h2>
+          <p>This widget looks cutest near a weekly planner, school dashboard, morning page, or life planner homepage.</p>
+        </div>
+      </section>
+
+      <section class="preview-card">
+        <div class="section-heading">
+          <p class="section-label">live preview</p>
+          <h2>See your forecast before copying</h2>
+        </div>
+
+        <div class="preview-frame">
+          <div id="previewWidget" class="widget pink weekly-widget">
+            <div class="weather-content">
+              <p id="previewLiveDate" class="live-date">today</p>
+
+              <div class="location-block">
+                <p id="previewCityName">Los Angeles</p>
+                <p id="previewStateName">California</p>
+                <div class="location-divider"></div>
+              </div>
+
+              <div class="weekly-grid preview-weekly-grid">
+                <div class="day-card active">
+                  <span>mon</span>
+                  <strong>72°</strong>
+                  <small>sunny</small>
+                </div>
+                <div class="day-card">
+                  <span>tue</span>
+                  <strong>74°</strong>
+                  <small>cloudy</small>
+                </div>
+                <div class="day-card">
+                  <span>wed</span>
+                  <strong>70°</strong>
+                  <small>rain</small>
+                </div>
+                <div class="day-card">
+                  <span>thu</span>
+                  <strong>73°</strong>
+                  <small>clear</small>
+                </div>
+                <div class="day-card">
+                  <span>fri</span>
+                  <strong>76°</strong>
+                  <small>warm</small>
+                </div>
+                <div class="day-card">
+                  <span>sat</span>
+                  <strong>77°</strong>
+                  <small>sunny</small>
+                </div>
+                <div class="day-card">
+                  <span>sun</span>
+                  <strong>75°</strong>
+                  <small>soft</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="customize-card">
+        <div class="section-heading">
+          <p class="section-label">customize</p>
+          <h2>Make it match your dashboard</h2>
+        </div>
+
+        <div class="control-panel">
+          <div class="top-left-controls">
+            <div id="locationBtn" class="btn location-btn" title="type location">📍</div>
+            <div id="themeToggle" class="btn theme-toggle-btn" title="select theme"></div>
+            <div id="appearanceToggle" class="btn appearance-toggle-btn" title="background">bg</div>
+            <div id="fontToggle" class="btn font-toggle-btn" title="font">Aa</div>
+          </div>
+
+          <div id="locationPopup" class="location-popup hidden">
+            <div class="location-title">type your city</div>
+            <input id="cityInput" class="city-input" placeholder="e.g. london, tokyo, la" />
+          </div>
+
+          <div id="themeOptions" class="theme-options hidden">
+            <div class="theme-circle pink" data-theme="pink"></div>
+            <div class="theme-circle beige" data-theme="beige"></div>
+            <div class="theme-circle blue" data-theme="blue"></div>
+            <div class="theme-circle green" data-theme="green"></div>
+            <div class="theme-circle black" data-theme="black"></div>
+            <div class="theme-circle white" data-theme="white"></div>
+          </div>
+
+          <div id="appearanceOptions" class="theme-options hidden appearance-options">
+            <div class="appearance-option" data-appearance="light">light</div>
+            <div class="appearance-option" data-appearance="dark">dark</div>
+            <div class="appearance-option" data-appearance="system">system</div>
+          </div>
+
+          <div id="fontOptions" class="theme-options hidden">
+            <div class="font-option" data-font="default">default</div>
+            <div class="font-option" data-font="serif">serif</div>
+            <div class="font-option" data-font="mono">mono</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="setup-card">
+        <div class="section-heading">
+          <p class="section-label">embed</p>
+          <h2>Copy your Notion link</h2>
+        </div>
+
+        <button id="copyLinkBtn" class="copy-btn">
+          copy my embed Notion link .ᐟ.ᐟ
+        </button>
+
+        <p id="copyMessage" class="copy-message hidden">
+          copied! paste into Notion .ᐟ.ᐟ
+        </p>
+      </section>
+
+      <section class="faq-card">
+        <p class="section-label">help</p>
+        <h2>FAQ</h2>
+
+        <details>
+          <summary>How do I add this to Notion?</summary>
+          <p>Copy your embed link, go to Notion, type /embed, paste the link, and confirm!</p>
+        </details>
+
+        <details>
+          <summary>Can I change the city?</summary>
+          <p>Yes! Click the location button, type your city, then copy a fresh embed link.</p>
+        </details>
+
+        <details>
+          <summary>Can I change the style later?</summary>
+          <p>Yes! Come back to this builder page, update your settings, and copy a fresh embed link.</p>
+        </details>
+      </section>
+
+      <section class="updates-card">
+        <p class="section-label">recent updates</p>
+        <h2>Weekly Weather Widget v1.0</h2>
+        <ul>
+          <li>Added weekly forecast cards.</li>
+          <li>Added location search.</li>
+          <li>Added matching Notion-style themes, fonts, and background modes.</li>
+        </ul>
+      </section>
+
+      <footer class="footer-links">
+        <a href="https://digitalforguru.github.io/digitalguru-notion-widget-claim-hub/" class="footer-link">Back to Widget Studio</a>
+        <span class="divider">•</span>
+        <a href="https://stan.store/digitalforguru" target="_blank" class="footer-link">shop digitalguru</a>
+        <span class="divider">•</span>
+        <a href="https://tiktok.com/@digitaluru" target="_blank" class="footer-link">TikTok</a>
+      </footer>
+
+    </section>
+  </main>
+
+  <div id="weatherWidget" class="widget pink weekly-widget embed-widget">
+    <div class="weather-content">
+      <p id="liveDate" class="live-date"></p>
+
+      <div class="location-block">
+        <p id="cityName">Los Angeles</p>
+        <p id="stateName">California</p>
+        <div class="location-divider"></div>
+      </div>
+
+      <div class="weekly-grid" id="weeklyGrid"></div>
     </div>
   </div>
 
-  <!-- FONT OPTIONS -->
-  <div id="fontOptions" class="theme-options hidden">
-    <div class="font-option" data-font="default">default</div>
-    <div class="font-option" data-font="serif">serif</div>
-    <div class="font-option" data-font="mono">mono</div>
-  </div>
-
-  <!-- TIP -->
-  <div id="usageTip" class="usage-tip">
-    Welcome to your Notion widget by DigitalGuru!<br>
-    view your weekly forecast with our layout built for Notion<br>
-    - click options to customize (all options match Notion pages, eg; colors, fonts)<br>
-    - copy your embed link<br>
-    - paste into Notion ✧
-  </div>
-
-  <!-- CONTROLS -->
-  <div class="top-left-controls">
-
-    <div id="locationBtn" class="btn location-btn" title="type location">
-      📍
-    </div>
-
-    <div id="themeToggle" class="btn theme-toggle-btn" title="select theme"></div>
-
-    <div id="fontToggle" class="btn font-toggle-btn" title="font">Aa</div>
-
-    <!-- LOCATION POPUP -->
-    <div id="locationPopup" class="location-popup hidden">
-      <div class="location-title">type your city</div>
-      <input id="cityInput" class="city-input" placeholder="e.g. london, tokyo, la" />
-    </div>
-
-  </div>
-
-  <!-- COPY BUTTON -->
-  <div class="setup-area">
-    <button id="copyLinkBtn" class="copy-btn">
-      copy my embed Notion link .ᐟ.ᐟ
-    </button>
-
-    <p id="copyMessage" class="copy-message hidden">
-      copied! paste into notion .ᐟ.ᐟ
-    </p>
-  </div>
-
-  <!-- FOOTER -->
-  <div class="footer-links">
-    <a href="https://stan.store/digitalforguru" target="_blank" class="footer-link">
-      shop digitalguru
-    </a>
-
-    <span class="divider">•</span>
-
-    <a href="https://tiktok.com/@digitaluru" target="_blank" class="footer-link">
-      socials
-    </a>
-  </div>
-
-</div>
-
-<!-- 🌤️ WEEKLY WEATHER WIDGET -->
-<div id="weatherWidget" class="widget pink weekly-widget">
-
- <div class="weather-content">
-  <p id="liveDate" class="live-date"></p>
-
-  <div class="location-block">
-    <p id="cityName">Los Angeles</p>
-    <p id="stateName">California</p>
-    <div class="location-divider"></div>
-  </div>
-
-  <div class="weekly-grid"></div>
-</div>
-
-    </div>
-
-  </div>
-
-</div>
-
-<script src="weather.js"></script>
-
+  <script src="weather.js"></script>
 </body>
 </html>
